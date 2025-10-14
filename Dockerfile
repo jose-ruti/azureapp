@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-noble AS base
+FROM gradle:8.14-jdk21-noble AS base
 WORKDIR /java/app/base
 
 RUN apt-get update 
@@ -8,25 +8,25 @@ RUN rm -rf /var/lib/apt/lists/*
 
 COPY . .
 COPY build.gradle .
-COPY gradlew .
 COPY settings.gradle .
-#TODO: obtener dependencias
-RUN ./gradlew dependencies
+RUN gradle dependencies
 
-FROM eclipse-temurin:21-jdk-noble AS builder
+FROM gradle:8.14-jdk21-noble AS builder
 WORKDIR /java/app/builder
+RUN apt-get update && apt-get install wget -y
 
 COPY --from=base /java/app/base /java/app/builder
-RUN ./gradlew clean build -x test --no-daemon
+RUN gradle clean build -x test --no-daemon
 
-FROM eclipse-temurin:21-jre-alpine
+RUN wget https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.7.4/applicationinsights-agent-3.7.4.jar
+FROM gcr.io/distroless/java21-debian12 AS runtime
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
 ENV JAVA_OPTS=""
 
-RUN adduser -D -s /bin/sh app
-WORKDIR /home/app
-USER app
-COPY --from=builder /java/app/builder/build/libs/azure-app-0.0.1-SNAPSHOT.jar /home/app/app.jar
+WORKDIR /app
+USER nobody
+COPY --from=builder /java/app/builder/build/libs/azure-app-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY --from=builder /java/app/builder/applicationinsights-agent-3.7.4.jar /app/applicationinsights-agent-3.7.4.jar
 EXPOSE 8080
+ENTRYPOINT [ "java","-Djava.security.egd=file:/dev/./urandom", "-javaagent:/app/applicationinsights-agent-3.7.4.jar", "-jar", "/app/app.jar", "${JAVA_OPTS}", "{0}", "{@}" ]
 
-ENTRYPOINT [ "sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -jar app.jar ${JAVA_OPTS} {0} {@}" ]
