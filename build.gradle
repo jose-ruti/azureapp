@@ -36,6 +36,10 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
 
+bootRun{
+	jvmArgs=['-javaagent:./applicationinsights-agent-3.7.4.jar']
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
