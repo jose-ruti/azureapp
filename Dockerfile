@@ -21,6 +21,7 @@ RUN gradle clean build -x test --no-daemon
 RUN wget https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.7.4/applicationinsights-agent-3.7.4.jar
 FROM gcr.io/distroless/java21-debian12 AS runtime
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+ENV APPLICATION_INSIGHTS_CONNECTION_STRING=""
 ENV JAVA_OPTS=""
 
 WORKDIR /app

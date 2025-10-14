@@ -30,7 +30,6 @@ dependencies {
 	implementation 'com.microsoft.azure:applicationinsights-runtime-attach:3.7.5'
 	implementation 'com.microsoft.azure:applicationinsights-core:3.7.5'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'io.micrometer:micrometer-registry-otlp'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
